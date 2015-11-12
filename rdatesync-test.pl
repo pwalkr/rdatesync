@@ -82,5 +82,24 @@ sub TestLogModifiedFile {
 sub TestLogRemoveFile {
 }
 
+# Utility functions
+
+# _inode - return the inode number of a file. -1 if missing
+sub _inode {
+	my $filename = shift;
+	if (-f $filename and `/bin/ls -i '$filename' 2>/dev/null` =~ /^([0-9]+)\s/) {
+		return $1;
+	}
+	return -1;
+}
+
+# _md5sum - return the md5sum of a file. Otherwise undefined
+sub _md5sum {
+	my $filename = shift;
+	if (-f $filename and `/usr/bin/md5sum '$filename' 2>/dev/null` =~ /^([a-z0-9]+)\s/) {
+		return $1;
+	}
+}
+
 &PrintUsageNoArgs();
 &TestBasicConfig();

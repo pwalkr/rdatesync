@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::Simple tests => 3;
+use Test::Simple tests => 6;
 
 my $RDATESYNC = `printf \$(cd \$(dirname $0) && pwd)/rdatesync.pl`;
 
@@ -33,6 +33,34 @@ sub TestConfigComments {
 
 # TestFirstBackup - can create backup destination and first backup
 sub TestFirstBackup {
+	my $config = "/tmp/rds_test.conf";
+	my $destination = "/tmp/archive";
+	my $dirname = "source";
+	my $backup = "/tmp/$dirname";
+	my $filename = "testFile";
+	my $date_today = `date +%Y-%m-%d`;
+	my $source_file_path;
+	my $target_file_path;
+
+	chomp($date_today);
+	$source_file_path = "$backup/$filename";
+	$target_file_path = "$destination/$date_today/$dirname/$filename";
+
+	open (FH, '>', $config) or die "Failed to generate test conf file";
+	print FH "destination $destination\n";
+	print FH "backup $backup\n";
+	close(FH);
+
+	system("mkdir -p '$backup'");
+	open (FH, '>', $source_file_path) or die "Failed to generate test file for backup";
+	print FH $filename;
+	close(FH);
+
+	system("perl $RDATESYNC $config >/dev/null 2>&1");
+
+	ok( -f "$target_file_path" );
+	ok(  &_md5sum("$target_file_path") eq &_md5sum("$source_file_path") );
+	ok(  &_inode("$target_file_path") ne &_inode("$source_file_path") );
 }
 
 # TestMultiBackup - Test that multiple directories can be backed up
@@ -103,3 +131,4 @@ sub _md5sum {
 
 &PrintUsageNoArgs();
 &TestBasicConfig();
+&TestFirstBackup();

@@ -74,6 +74,10 @@ sub TestMultiBackup {
 sub TestTrailingSlash {
 }
 
+# TestPathSpaces - Test that we can backup to/from folders with spaces in file names
+sub TestPathSpaces {
+}
+
 # TestSecondBackup - can create second backup
 sub TestSecondBackup {
 	# Check for all hard links to previous backup

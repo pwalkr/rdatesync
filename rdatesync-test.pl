@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::Simple tests => 6;
+use Test::Simple tests => 12;
 
 my $WORKSPACE = "/tmp/rds_ws";
 my $RDATESYNC = `printf \$(cd \$(dirname $0) && pwd)/rdatesync.pl`;
@@ -68,6 +68,48 @@ sub TestFirstBackup {
 
 # TestMultiBackup - Test that multiple directories can be backed up
 sub TestMultiBackup {
+	my $config = "$WORKSPACE/rds_test.conf";
+	my $destination = "$WORKSPACE/archive";
+	my $dirname1 = "source1";
+	my $backup1 = "$WORKSPACE/$dirname1";
+	my $dirname2 = "source2";
+	my $backup2 = "$WORKSPACE/$dirname2";
+	my $filename = "testFile";
+	my $date_today = `date +%Y-%m-%d`;
+	my $source_file_path1;
+	my $source_file_path1;
+	my $target_file_path2;
+	my $target_file_path2;
+
+	chomp($date_today);
+	$source_file_path1 = "$backup1/$filename";
+	$target_file_path1 = "$destination/$date_today/$dirname1/$filename";
+	$source_file_path2 = "$backup2/$filename";
+	$target_file_path2 = "$destination/$date_today/$dirname2/$filename";
+
+	open (FH, '>', $config) or die "Failed to generate test conf file";
+	print FH "destination $destination\n";
+	print FH "backup $backup1\n";
+	print FH "backup $backup2\n";
+	close(FH);
+
+	system("mkdir -p '$backup1'");
+	open (FH, '>', $source_file_path1) or die "Failed to generate test file for backup";
+	print FH $filename;
+	close(FH);
+	system("mkdir -p '$backup2'");
+	open (FH, '>', $source_file_path2) or die "Failed to generate test file for backup";
+	print FH $filename;
+	close(FH);
+
+	system("perl $RDATESYNC $config >/dev/null 2>&1");
+
+	ok( -f "$target_file_path1" );
+	ok(  &_md5sum("$target_file_path1") eq &_md5sum("$source_file_path1") );
+	ok(  &_inode("$target_file_path1") ne &_inode("$source_file_path1") );
+	ok( -f "$target_file_path2" );
+	ok(  &_md5sum("$target_file_path2") eq &_md5sum("$source_file_path2") );
+	ok(  &_inode("$target_file_path2") ne &_inode("$source_file_path2") );
 }
 
 # TestTrailingSlash - Test that backup directives can have trailing slashes
@@ -139,3 +181,4 @@ sub _md5sum {
 &PrintUsageNoArgs();
 &TestBasicConfig();
 &TestFirstBackup();
+&TestMultiBackup();

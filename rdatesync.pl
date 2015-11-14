@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 my $DESTINATION;
-my $BACKUP;
+my @BACKUPS = ();
 
 if ($#ARGV < 0) {
 	&usage();
@@ -30,7 +30,7 @@ sub readConf {
 			}
 			elsif ($_ =~ /^backup\s+(.*)$/) {
 				print "backup: $1\n";
-				$BACKUP = $1;
+				push(@BACKUPS, $1);
 			}
 		}
 		close($cfh);
@@ -44,7 +44,9 @@ sub rsync {
 		. " --delete";
 
 	chomp($date_today);
-	$command .= " $BACKUP";
+	foreach (@BACKUPS) {
+		$command .= " $_";
+	}
 	$command .= " $DESTINATION/$date_today";
 
 	system("mkdir -p '$DESTINATION'");

@@ -17,6 +17,8 @@ sub usage {
 		. "    config file must be of the format:\n"
 		. "        destination /path/to/backups/destination\n"
 		. "        backup /path/to/backup\n"
+		. "        backup /path/to/another/backup\n"
+		. "        backup ...\n"
 		. "\n";
 }
 

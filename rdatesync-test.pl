@@ -5,6 +5,22 @@ use Test::Simple tests => 12;
 my $WORKSPACE = "/tmp/rds_ws";
 my $RDATESYNC = `printf \$(cd \$(dirname $0) && pwd)/rdatesync.pl`;
 
+sub _setup {
+	system("rm -rf $WORKSPACE");
+
+	system("mkdir -p '$WORKSPACE'");
+}
+
+sub _teardown {
+	system("rm -rf $WORKSPACE");
+}
+
+sub _runTest {
+	my $test = shift;
+	&_setup();
+	&{$test}();
+}
+
 sub PrintUsageNoArgs {
 	my $output = `perl $RDATESYNC`;
 	ok( $output =~ "Usage" );
@@ -16,8 +32,6 @@ sub TestBasicConfig {
 	my $config = "$WORKSPACE/rds_test.conf";
 	my $destination = "$WORKSPACE/archive";
 	my $source = "$WORKSPACE/source";
-
-	system("mkdir -p $WORKSPACE");
 
 	open (CFH, '>', $config) or die "Failed to generate test conf file";
 	print CFH "destination $destination\n";
@@ -178,7 +192,8 @@ sub _md5sum {
 	}
 }
 
-&PrintUsageNoArgs();
-&TestBasicConfig();
-&TestFirstBackup();
-&TestMultiBackup();
+&_runTest(\&PrintUsageNoArgs);
+&_runTest(\&TestBasicConfig);
+&_runTest(\&TestFirstBackup);
+&_runTest(\&TestMultiBackup);
+&_teardown();

@@ -2,6 +2,7 @@
 
 use Test::Simple tests => 6;
 
+my $WORKSPACE = "/tmp/rds_ws";
 my $RDATESYNC = `printf \$(cd \$(dirname $0) && pwd)/rdatesync.pl`;
 
 sub PrintUsageNoArgs {
@@ -12,16 +13,18 @@ sub PrintUsageNoArgs {
 # TestBasicConfig - test that rdatesync.pl can read a config file
 sub TestBasicConfig {
 	my $output;
-	my $config = "/tmp/rds_test.conf";
-	my $destination = "/tmp/archive";
-	my $source = "/tmp/source";
+	my $config = "$WORKSPACE/rds_test.conf";
+	my $destination = "$WORKSPACE/archive";
+	my $source = "$WORKSPACE/source";
+
+	system("mkdir -p $WORKSPACE");
 
 	open (CFH, '>', $config) or die "Failed to generate test conf file";
 	print CFH "destination $destination\n";
 	print CFH "backup $source\n";
 	close(CFH);
 
-	$output = `perl $RDATESYNC $config`;
+	$output = `perl $RDATESYNC $config 2>&1`;
 	ok( $output =~ "destination: $destination" );
 	ok( $output =~ "backup: $source" );
 }
@@ -33,10 +36,10 @@ sub TestConfigComments {
 
 # TestFirstBackup - can create backup destination and first backup
 sub TestFirstBackup {
-	my $config = "/tmp/rds_test.conf";
-	my $destination = "/tmp/archive";
+	my $config = "$WORKSPACE/rds_test.conf";
+	my $destination = "$WORKSPACE/archive";
 	my $dirname = "source";
-	my $backup = "/tmp/$dirname";
+	my $backup = "$WORKSPACE/$dirname";
 	my $filename = "testFile";
 	my $date_today = `date +%Y-%m-%d`;
 	my $source_file_path;

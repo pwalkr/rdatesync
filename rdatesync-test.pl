@@ -68,10 +68,7 @@ sub TestFirstBackup {
 	print FH "backup $backup\n";
 	close(FH);
 
-	system("mkdir -p '$backup'");
-	open (FH, '>', $source_file_path) or die "Failed to generate test file for backup";
-	print FH $filename;
-	close(FH);
+	&_mkfile($source_file_path);
 
 	system("perl $RDATESYNC $config >/dev/null 2>&1");
 
@@ -107,14 +104,8 @@ sub TestMultiBackup {
 	print FH "backup $backup2\n";
 	close(FH);
 
-	system("mkdir -p '$backup1'");
-	open (FH, '>', $source_file_path1) or die "Failed to generate test file for backup";
-	print FH $filename;
-	close(FH);
-	system("mkdir -p '$backup2'");
-	open (FH, '>', $source_file_path2) or die "Failed to generate test file for backup";
-	print FH $filename;
-	close(FH);
+	&_mkfile($source_file_path1);
+	&_mkfile($source_file_path2);
 
 	system("perl $RDATESYNC $config >/dev/null 2>&1");
 
@@ -175,6 +166,13 @@ sub TestLogRemoveFile {
 
 # Utility functions
 
+# _dirname - return a path with all preceding directories removed (.*/)
+sub _dirname {
+	my $path = shift;
+	$path =~ s/\/[^\/]+$//;
+	return $path;
+}
+
 # _inode - return the inode number of a file. -1 if missing
 sub _inode {
 	my $filename = shift;
@@ -190,6 +188,15 @@ sub _md5sum {
 	if (-f $filename and `/usr/bin/md5sum '$filename' 2>/dev/null` =~ /^([a-z0-9]+)\s/) {
 		return $1;
 	}
+}
+
+# _mkfile - make a file and seed with its name as contents
+sub _mkfile {
+	my $file = shift;
+	system("mkdir -p " . &_dirname($file));
+	open (FH, '>', $file) or die "Failed to generate $file";
+	print FH $file;
+	close(FH)
 }
 
 &_runTest(\&PrintUsageNoArgs);

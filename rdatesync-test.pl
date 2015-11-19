@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::Simple tests => 12;
+use Test::Simple tests => 16;
 
 my $WORKSPACE = "/tmp/rds_ws";
 my $RDATESYNC = `printf \$(cd \$(dirname $0) && pwd)/rdatesync.pl`;
@@ -196,26 +196,44 @@ sub TestTrailingSlash {
 sub TestPathSpaces {
 }
 
-# TestSecondBackup - can create second backup
-sub TestSecondBackup {
+=head2 TestSecondBackupNoChange
+
+If a file has not changed between backups, a hard link can be used to avoid
+duplicating data on the disk. This significantly reduces the disk space needed
+to store multiple days. Rsync can do this using the --link-dest argument
+
+Test passes if inodes match between today/yesterday for all files.
+
+=cut
+
+sub TestSecondBackupNoChange {
 	# Check for all hard links to previous backup
 	my $date_today = `printf \$(date +%Y-%m-%d)`;
 	my $date_yesterday = `printf \$(date --date="yesterday" +%Y-%m-%d)`;
+	my $file_original =  "$WORKSPACE/folder/file";
+	my $file_today =     "$WORKSPACE/target/$date_today/folder/file";
+	my $file_yesterday = "$WORKSPACE/target/$date_yesterday/folder/file";
 	my $conf;
 
-	&_mkfile("$WORKSPACE/source/file");
+	&_mkfile("$file_original");
 
 	my $conf = &_writeconf(
-		"$WORKSPACE/target/",
-		"$WORKSPACE/source"
-	)
+		"$WORKSPACE/target",
+		"$WORKSPACE/folder"
+	);
 	&_runconf($conf);
 
 	system("mv $WORKSPACE/target/$date_today $WORKSPACE/target/$date_yesterday");
 
 	&_runconf($conf);
 
-	ok ( -f "$WORKSPACE/target/$date_today/source/file" )
+	ok ( -f $file_today and -f $file_yesterday );
+	ok ( &_inode($file_today) == &_inode($file_yesterday) );
+
+	# These two are more of an rsync validation, that the extra --link-dest
+	# flag doesn't change files or create hard links where there shouldn't be.
+	ok ( &_md5sum($file_original) == &_md5sum($file_today) );
+	ok ( &_inode($file_original) != &_inode($file_today) );
 }
 
 # TestBadBackupSource - do not break if conf contains a nonexistant source directory
@@ -344,5 +362,5 @@ sub _writeconf {
 &_runTest(\&TestConfigRead);
 &_runTest(\&TestFirstBackup);
 &_runTest(\&TestMultiBackup);
-#&_runTest(\&TestSecondBackup);
+&_runTest(\&TestSecondBackupNoChange);
 &_teardown();

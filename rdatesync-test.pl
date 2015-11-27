@@ -169,10 +169,6 @@ sub TestFirstBackup {
 	my $date_today = `date +%Y-%m-%d`;
 	my $source_file_path;
 	my $target_file_path;
-	my $config = &_writeconf(
-		$destination,
-		$backup
-	);
 
 	chomp($date_today);
 	$source_file_path = "$backup/testFile";
@@ -180,7 +176,10 @@ sub TestFirstBackup {
 
 	&_mkfile($source_file_path);
 
-	&_runconf($config);
+	&_runconf( &_writeconf(
+		$destination,
+		$backup
+	));
 
 	ok( -f "$target_file_path" );
 	ok(  &_md5sum("$target_file_path") eq &_md5sum("$source_file_path") );

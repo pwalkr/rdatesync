@@ -2,6 +2,7 @@
 
 use Test::Simple tests => 16;
 
+my $DEBUG = 0;
 my $WORKSPACE = "/tmp/rds_ws";
 my $RDATESYNC = `printf \$(cd \$(dirname $0) && pwd)/rdatesync.pl`;
 
@@ -381,7 +382,16 @@ a file path string that can be used with L</_runconf>
 
 sub _runconf {
 	my $config = shift;
-	return `perl $RDATESYNC '$config' 2>&1`;
+	my $output = "";
+	print "Running rdatesync.pl\n" if ($DEBUG);
+	if (open CMD, "perl $RDATESYNC '$config' 2>&1 |") {
+		while (<CMD>) {
+			print "    $_" if ($DEBUG);
+			$output .= $_;
+		}
+		close CMD;
+	}
+	return $output;
 }
 
 =head2 _runconf

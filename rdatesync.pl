@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+use warnings;
+use strict;
+
 my $DESTINATION;
 my @BACKUPS = ();
 my @DAYS = ();
@@ -40,7 +43,7 @@ sub readConf {
 				push(@BACKUPS, $1);
 			}
 		}
-		close($cfh);
+		close(CFH);
 	}
 }
 

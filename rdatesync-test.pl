@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+use warnings;
+use strict;
 use Test::Simple tests => 16;
 
 my $DEBUG = 0;
@@ -269,10 +271,11 @@ sub TestSecondBackupNoChange {
 
 	&_mkfile("$file_original");
 
-	my $conf = &_writeconf(
+	$conf = &_writeconf(
 		"$WORKSPACE/target",
 		"$WORKSPACE/folder"
 	);
+
 	&_runconf($conf);
 
 	system("mv $WORKSPACE/target/$date_today $WORKSPACE/target/$date_yesterday");
@@ -284,7 +287,7 @@ sub TestSecondBackupNoChange {
 
 	# These two are more of an rsync validation, that the extra --link-dest
 	# flag doesn't change files or create hard links where there shouldn't be.
-	ok ( &_md5sum($file_original) == &_md5sum($file_today) );
+	ok ( &_md5sum($file_original) eq &_md5sum($file_today) );
 	ok ( &_inode($file_original) != &_inode($file_today) );
 }
 

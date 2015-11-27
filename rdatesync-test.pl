@@ -288,6 +288,17 @@ sub TestSecondBackupNoChange {
 	ok ( &_inode($file_original) != &_inode($file_today) );
 }
 
+=head2 TestRerunBackup
+
+If the backup is re-run on the same day... bail out or re-run?
+
+=head3 TODO
+
+=cut
+
+sub TestRerunBackup {
+}
+
 # TestDefaultDays - test that a default of 7 days are backed up
 sub TestDefaultDays {
 }

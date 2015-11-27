@@ -72,15 +72,19 @@ sub TestConfigComments {
 rsync behaves differently if the source directories have trailing slashes.
 
 To back up local/source/file,
+
 	rsync local/source remote
 
 will produce
+
 	remote/source/file
 
 whereas
+
 	rsync local/source/ remote
 
 will produce
+
 	remote/file
 
 To avoid potential name conflicts between the contents of a backup and
@@ -95,6 +99,7 @@ sub TestConfigTrailingSlash {
 
 Since rsync produces a directory containing the basename of each source input,
 these two backups:
+
 	destination /archive
 	backup /source/mybackup
 	backup /source/subdir/mybackup
@@ -116,10 +121,12 @@ The first backup (and each day's backup) will produce a folder with today's
 date (yyyy-mm-dd) and a sub-folder for each backup in the config. E.g.
 
 backups.conf:
+
 	destination /archive
 	backup /source/myfolder
 
 Will produce (if run on January 2nd, 2000):
+
 	/archive/2000-01-02/myfolder
 
 =cut

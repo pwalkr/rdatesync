@@ -2,14 +2,17 @@
 
 my $DESTINATION;
 my @BACKUPS = ();
+my @DAYS = ();
 my $DATE_TODAY = `date +%Y-%m-%d`;
 chomp($DATE_TODAY);
+my $LINK_DEST;
 
 if ($#ARGV < 0) {
 	&usage();
 	exit 0;
 }
 &readConf($ARGV[0]);
+&getDays();
 &rsync();
 
 sub usage {
@@ -41,11 +44,32 @@ sub readConf {
 	}
 }
 
+sub getDays {
+	if (opendir DH, $DESTINATION) {
+		while (readdir DH) {
+			if (-d "$DESTINATION/$_" and $_ =~ /^\d{4}-\d{2}-\d{2}$/) {
+				push(@DAYS, $_);
+			}
+		}
+		closedir DH;
+		@DAYS = sort @DAYS;
+		if ($#DAYS >= 0) {
+			if ($DAYS[0] ne $DATE_TODAY) {
+				$LINK_DEST = "$DESTINATION/$DAYS[0]";
+			}
+		}
+	}
+}
+
 sub rsync {
 	my $DATE_TODAY = `date +%Y-%m-%d`;
 	my $command = "/usr/bin/rsync"
 		. " --archive"
 		. " --delete";
+
+	if ($LINK_DEST) {
+		$command .= " --link-dest $LINK_DEST";
+	}
 
 	foreach (@BACKUPS) {
 		$command .= " $_";

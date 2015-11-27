@@ -2,6 +2,8 @@
 
 my $DESTINATION;
 my @BACKUPS = ();
+my $DATE_TODAY = `date +%Y-%m-%d`;
+chomp($DATE_TODAY);
 
 if ($#ARGV < 0) {
 	&usage();
@@ -40,16 +42,15 @@ sub readConf {
 }
 
 sub rsync {
-	my $date_today = `date +%Y-%m-%d`;
+	my $DATE_TODAY = `date +%Y-%m-%d`;
 	my $command = "/usr/bin/rsync"
 		. " --archive"
 		. " --delete";
 
-	chomp($date_today);
 	foreach (@BACKUPS) {
 		$command .= " $_";
 	}
-	$command .= " $DESTINATION/$date_today";
+	$command .= " $DESTINATION/$DATE_TODAY";
 
 	system("mkdir -p '$DESTINATION'");
 

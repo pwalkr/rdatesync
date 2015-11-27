@@ -93,6 +93,9 @@ a separate backup, rdatesync.pl should strip any trailing slash
 =cut
 
 sub TestConfigTrailingSlash {
+=head3 TODO
+Print ERROR message that a backup had a trailing slash
+=cut
 }
 
 =head2 TestConfigDuplicateBackup
@@ -113,6 +116,20 @@ if it needs to skip a subsequent directory.
 =cut
 
 sub TestConfigDuplicateBackup {
+=head3 TODO
+=cut
+}
+
+sub TestConfigNoDestination {
+=head3 TODO
+Warn user that no destination was configured
+=cut
+}
+
+sub TestConfigNoBackups {
+=head3 TODO
+	Warn no backups were specified or no specified backups were present.
+=cut
 }
 
 =head2 TestFirstBackup
@@ -188,8 +205,12 @@ sub TestMultiBackup {
 	ok(  &_inode("$target_file_path2") ne &_inode("$source_file_path2") );
 }
 
-# TestTrailingSlash - Test that backup directives can have trailing slashes
 sub TestTrailingSlash {
+=head3 TODO
+
+	TestTrailingSlash - Test that backup directives can have trailing slashes
+
+=cut
 }
 
 # TestPathSpaces - Test that we can backup to/from folders with spaces in file names

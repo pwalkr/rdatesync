@@ -317,11 +317,19 @@ If the backup is re-run on the same day... bail out or re-run?
 sub TestRerunBackup {
 }
 
-# TestDefaultDays - test that a default of 7 days are backed up
+=head2 TestDefaultDays
+
+By default, 7 days of backups should be preserved
+
+=cut
+
 sub TestDefaultDays {
 }
 
-# TestMaxDays - test that "days X" means no more than X days are backed up
+=head2 TestMaxDays - test that "days X" means no more than X days are backed up
+
+=cut
+
 sub TestMaxDays {
 }
 

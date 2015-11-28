@@ -2,7 +2,7 @@
 
 use warnings;
 use strict;
-use Test::More tests => 13;
+use Test::More tests => 16;
 
 my $DEBUG = 0;
 my $WORKSPACE = "/tmp/rds_ws";
@@ -324,6 +324,43 @@ By default, 7 days of backups should be preserved
 =cut
 
 sub TestDefaultDays {
+	my $date_today = `printf \$(date +%Y-%m-%d)`;
+	my $date_1day_ago = `printf \$(date --date="yesterday" +%Y-%m-%d)`;
+	my $date_2day_ago = `printf \$(date --date="2 days ago" +%Y-%m-%d)`;
+	my $date_3day_ago = `printf \$(date --date="3 days ago" +%Y-%m-%d)`;
+	my $date_4day_ago = `printf \$(date --date="4 days ago" +%Y-%m-%d)`;
+	my $date_5day_ago = `printf \$(date --date="5 days ago" +%Y-%m-%d)`;
+	my $date_6day_ago = `printf \$(date --date="6 days ago" +%Y-%m-%d)`;
+	my $date_7day_ago = `printf \$(date --date="7 days ago" +%Y-%m-%d)`;
+	my $date_8day_ago = `printf \$(date --date="8 days ago" +%Y-%m-%d)`;
+	my $file_original =  "$WORKSPACE/folder/file";
+	my $file_today =     "$WORKSPACE/target/$date_today/folder/file";
+	my $file_1day_ago = "$WORKSPACE/target/$date_1day_ago/folder/file";
+	my $conf;
+
+	&_mkfile("$file_original");
+
+	$conf = &_writeconf(
+		"$WORKSPACE/target",
+		"$WORKSPACE/folder"
+	);
+
+	&_runconf($conf);
+
+	system("cp -r $WORKSPACE/target/$date_today $WORKSPACE/target/$date_8day_ago");
+	system("cp -r $WORKSPACE/target/$date_today $WORKSPACE/target/$date_7day_ago");
+	system("cp -r $WORKSPACE/target/$date_today $WORKSPACE/target/$date_6day_ago");
+	system("cp -r $WORKSPACE/target/$date_today $WORKSPACE/target/$date_5day_ago");
+	system("cp -r $WORKSPACE/target/$date_today $WORKSPACE/target/$date_4day_ago");
+	system("cp -r $WORKSPACE/target/$date_today $WORKSPACE/target/$date_3day_ago");
+	system("cp -r $WORKSPACE/target/$date_today $WORKSPACE/target/$date_2day_ago");
+	system("mv $WORKSPACE/target/$date_today $WORKSPACE/target/$date_1day_ago");
+
+	&_runconf($conf);
+
+	ok( ! -d "$WORKSPACE/target/$date_8day_ago" && ! -d "$WORKSPACE/target/$date_7day_ago", "removed oldest backups");
+	ok( -d "$WORKSPACE/target/$date_6day_ago", "7th oldest backup still exists" );
+	ok( -d "$WORKSPACE/target/$date_today", "newest backup still exists" );
 }
 
 =head2 TestMaxDays - test that "days X" means no more than X days are backed up
@@ -457,4 +494,5 @@ sub _writeconf {
 &_runTest(\&TestFirstBackup);
 &_runTest(\&TestMultiBackup);
 &_runTest(\&TestSecondBackupNoChange);
+&_runTest(\&TestDefaultDays);
 &_teardown();

@@ -9,6 +9,7 @@ my @DAYS = ();
 my $DATE_TODAY = `date +%Y-%m-%d`;
 chomp($DATE_TODAY);
 my $LINK_DEST;
+my $MAX_DAYS = 7;
 
 if ($#ARGV < 0) {
 	&usage();
@@ -17,6 +18,7 @@ if ($#ARGV < 0) {
 &readConf($ARGV[0]);
 &getDays();
 &rsync();
+&trimDays();
 
 sub usage {
 	print "Usage:\n"
@@ -66,7 +68,6 @@ sub getDays {
 }
 
 sub rsync {
-	my $DATE_TODAY = `date +%Y-%m-%d`;
 	my $command = "/usr/bin/rsync"
 		. " --archive"
 		. " --delete";
@@ -84,4 +85,13 @@ sub rsync {
 
 	print "$command\n";
 	system("$command");
+
+	unshift(@DAYS, $DATE_TODAY);
+}
+
+sub trimDays {
+	while ($#DAYS ge $MAX_DAYS) {
+		system("rm -rf '$DESTINATION/$DAYS[$#DAYS]'");
+		pop(@DAYS);
+	}
 }

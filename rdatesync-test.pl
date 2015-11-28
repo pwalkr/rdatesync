@@ -288,6 +288,24 @@ sub TestSecondBackupNoChange {
 	ok ( &_inode($file_original) != &_inode($file_today) );
 }
 
+=head2 TestLinkMostRecent
+
+rdatesync.pl should link against the most recent backup (E.g. that the existing
+backups are sorted correctly)
+
+=head3 TODO
+
+=cut
+
+sub TestLinkMostRecent {
+	# Create first backup
+	# Modify file
+	# Create second backup
+	# Shift 2nd backup to last place (oldest)
+	# Create 3rd backup
+	# Test file does not match first backup
+}
+
 =head2 TestRerunBackup
 
 If the backup is re-run on the same day... bail out or re-run?
@@ -394,7 +412,7 @@ a file path string that can be used with L</_runconf>
 sub _runconf {
 	my $config = shift;
 	my $output = "";
-	print "Running rdatesync.pl\n" if ($DEBUG);
+	print "DEBUG: Running perl $RDATESYNC '$config'\n" if ($DEBUG);
 	if (open CMD, "perl $RDATESYNC '$config' 2>&1 |") {
 		while (<CMD>) {
 			print "    $_" if ($DEBUG);

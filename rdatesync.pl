@@ -52,7 +52,8 @@ sub getDays {
 			}
 		}
 		closedir DH;
-		@DAYS = sort @DAYS;
+		# Most recent (highest) day first
+		@DAYS = sort {$b cmp $a} @DAYS;
 		if ($#DAYS >= 0) {
 			if ($DAYS[0] ne $DATE_TODAY) {
 				$LINK_DEST = "$DESTINATION/$DAYS[0]";

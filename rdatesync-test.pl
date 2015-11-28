@@ -2,7 +2,7 @@
 
 use warnings;
 use strict;
-use Test::Simple tests => 16;
+use Test::More tests => 13;
 
 my $DEBUG = 0;
 my $WORKSPACE = "/tmp/rds_ws";
@@ -32,7 +32,7 @@ If run without arguments, rdatesync.pl should print usage.
 
 sub TestUsageOutput {
 	my $output = `perl $RDATESYNC`;
-	ok( $output =~ "Usage" );
+	ok( $output =~ "Usage", "Output shows Usage" );
 }
 
 =head2 TestConfigRead
@@ -55,8 +55,8 @@ sub TestConfigRead {
 	close(CFH);
 
 	$output = `perl $RDATESYNC $config 2>&1`;
-	ok( $output =~ "destination: $destination" );
-	ok( $output =~ "backup: $source" );
+	ok( $output =~ "destination: $destination", "Output shows correct destination" );
+	ok( $output =~ "backup: $source", "Output shows correct backup" );
 }
 
 =head2 TestConfigComments
@@ -184,9 +184,9 @@ sub TestFirstBackup {
 		$backup
 	));
 
-	ok( -f "$target_file_path" );
-	ok(  &_md5sum("$target_file_path") eq &_md5sum("$source_file_path") );
-	ok(  &_inode("$target_file_path") ne &_inode("$source_file_path") );
+	ok( -f "$target_file_path", "Backup file exists" );
+	is(  &_md5sum("$target_file_path"), &_md5sum("$source_file_path"), "md5sum matches source" );
+	isnt(  &_inode("$target_file_path"), &_inode("$source_file_path"), "inode does not match" );
 }
 
 =head2 TestPathSpaces
@@ -242,12 +242,10 @@ sub TestMultiBackup {
 
 	&_runconf($config);
 
-	ok( -f "$target_file_path1" );
-	ok(  &_md5sum("$target_file_path1") eq &_md5sum("$source_file_path1") );
-	ok(  &_inode("$target_file_path1") ne &_inode("$source_file_path1") );
-	ok( -f "$target_file_path2" );
-	ok(  &_md5sum("$target_file_path2") eq &_md5sum("$source_file_path2") );
-	ok(  &_inode("$target_file_path2") ne &_inode("$source_file_path2") );
+	is(  &_md5sum("$target_file_path1"), &_md5sum("$source_file_path1"), "File 1 md5sum matches source" );
+	is(  &_md5sum("$target_file_path2"), &_md5sum("$source_file_path2"), "File 2 md5sum matches source" );
+	isnt(  &_inode("$target_file_path1"), &_inode("$source_file_path1"), "File 1 inode does not match source" );
+	isnt(  &_inode("$target_file_path2"), &_inode("$source_file_path2"), "File 2 inode does not match source" );
 }
 
 =head2 TestSecondBackupNoChange
@@ -282,13 +280,12 @@ sub TestSecondBackupNoChange {
 
 	&_runconf($conf);
 
-	ok ( -f $file_today and -f $file_yesterday );
-	ok ( &_inode($file_today) == &_inode($file_yesterday) );
+	is( &_inode($file_today), &_inode($file_yesterday), "backup-0 inode matches backup-1" );
 
 	# These two are more of an rsync validation, that the extra --link-dest
 	# flag doesn't change files or create hard links where there shouldn't be.
-	ok ( &_md5sum($file_original) eq &_md5sum($file_today) );
-	ok ( &_inode($file_original) != &_inode($file_today) );
+	is( &_md5sum($file_original), &_md5sum($file_today), "md5sum matches source" );
+	isnt( &_inode($file_original), &_inode($file_today), "inode does not match source" );
 }
 
 =head2 TestLinkMostRecent

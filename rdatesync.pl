@@ -6,7 +6,7 @@ use strict;
 my $DESTINATION;
 my @BACKUPS = ();
 my @MOUNTS = ();
-my $DIFF_TOOL = `printf "\$(cd \$(dirname $0); pwd)/simplediff.sh`;
+my $DIFF_TOOL = `printf "\$(cd \$(dirname $0); pwd)/simplediff.sh"`;
 my @DAYS = ();
 my $DATE_TODAY = `date +%Y-%m-%d`;
 chomp($DATE_TODAY);

@@ -56,8 +56,9 @@ find * -type f | while read file; do compare_to_new "$file"; done
 cd "$DIR_NEW"
 find * -type f | while read file; do compare_to_old "$file"; done
 
-sed -i "/^$RESULTS_NAME /d" $RESULTS_TMP
-
 echo "$(basename "$DIR_OLD") => $(basename "$DIR_NEW")" > $RESULTS_FILE
-cat $RESULTS_TMP | sort | sed 's/^\(.\+\) \(.\)$/\2 \1/' >> $RESULTS_FILE
-rm -f $RESULTS_TMP
+if [ -f $RESULTS_TMP ]; then
+	sed -i "/^$RESULTS_NAME /d" $RESULTS_TMP
+	cat $RESULTS_TMP | sort | sed 's/^\(.\+\) \(.\)$/\2 \1/' >> $RESULTS_FILE
+	rm -f $RESULTS_TMP
+fi

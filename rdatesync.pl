@@ -5,6 +5,7 @@ use strict;
 
 my $DESTINATION;
 my @BACKUPS = ();
+my @MOUNTS = ();
 my @DAYS = ();
 my $DATE_TODAY = `date +%Y-%m-%d`;
 chomp($DATE_TODAY);
@@ -18,7 +19,7 @@ if ($#ARGV < 0) {
 &readConf($ARGV[0]);
 &getDays();
 &rsync();
-&trimDays();
+#&trimDays();
 
 sub usage {
 	print "Usage:\n"
@@ -29,6 +30,8 @@ sub usage {
 		. "        backup /path/to/backup\n"
 		. "        backup /path/to/another/backup\n"
 		. "        backup ...\n"
+		. "        mount /path/to/mount/point\n"
+		. "        mount ...\n"
 		. "\n";
 }
 

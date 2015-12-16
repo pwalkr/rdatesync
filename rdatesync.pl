@@ -6,6 +6,7 @@ use strict;
 my $DESTINATION;
 my @BACKUPS = ();
 my @MOUNTS = ();
+my $DIFF_TOOL = `printf "\$(cd \$(dirname $0); pwd)/simplediff.sh`;
 my @DAYS = ();
 my $DATE_TODAY = `date +%Y-%m-%d`;
 chomp($DATE_TODAY);
@@ -20,6 +21,9 @@ if ($#ARGV < 0) {
 &getDays();
 &rsync();
 #&trimDays();
+if (-d $LINK_DEST and -x $DIFF_TOOL) {
+	system("$DIFF_TOOL \"$LINK_DEST\" \"$DESTINATION/$DATE_TODAY\"");
+}
 
 sub usage {
 	print "Usage:\n"

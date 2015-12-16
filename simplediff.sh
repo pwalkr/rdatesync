@@ -58,7 +58,8 @@ find * -type f | while read file; do compare_to_old "$file"; done
 
 echo "$(basename "$DIR_OLD") => $(basename "$DIR_NEW")" > $RESULTS_FILE
 if [ -f $RESULTS_TMP ]; then
+	# Don't consider the changes file as a difference
 	sed -i "/^$RESULTS_NAME /d" $RESULTS_TMP
-	cat $RESULTS_TMP | sort | sed 's/^\(.\+\) \(.\)$/\2 \1/' >> $RESULTS_FILE
+	cat $RESULTS_TMP | sort | sed 's/^\(.\+\) \(.\)$/\2 \1/' | tee -a $RESULTS_FILE
 	rm -f $RESULTS_TMP
 fi

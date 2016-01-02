@@ -2,7 +2,7 @@
 
 use warnings;
 use strict;
-use Test::More tests => 19;
+use Test::More tests => 20;
 
 my $DEBUG = 0;
 my $WORKSPACE = "/tmp/rds_ws";
@@ -189,7 +189,7 @@ sub TestFirstBackup {
 	isnt(  &_inode("$target_file_path"), &_inode("$source_file_path"), "inode does not match" );
 }
 
-=head2 TestPathSpaces
+=head2 TestPathSpacesQuotes
 
 Spaces in paths are notorious for breaking things. Test that we can back up
 using a destination and backups with spaces in the path names
@@ -208,7 +208,25 @@ The following are tested:
 
 =cut
 
-sub TestPathSpaces {
+sub TestPathSpacesQuotes {
+	my $destination = "$WORKSPACE/the archive's";
+	my $backup = "$WORKSPACE/my source's/source's source";
+	my $date_today = `date +%Y-%m-%d`;
+	my $source_file_path;
+	my $target_file_path;
+
+	chomp($date_today);
+	$source_file_path = "$backup/testFile";
+	$target_file_path = "$destination/$date_today/source's source/testFile";
+
+	&_mkfile($source_file_path);
+
+	&_runconf( &_writeconf(
+		$destination,
+		$backup
+	));
+
+	ok( -f "$target_file_path", "Backup file exists" );
 }
 
 =head2 TestMultiBackup
@@ -456,7 +474,7 @@ Make a file and seed with its name as contents
 
 sub _mkfile {
 	my $file = shift;
-	system("mkdir -p " . &_dirname($file));
+	system('mkdir -p "' . &_dirname($file) . '"');
 	open (FH, '>', $file) or die "Failed to generate $file";
 	print FH $file;
 	close(FH)
@@ -507,6 +525,7 @@ sub _writeconf {
 &_runTest(\&TestUsageOutput);
 &_runTest(\&TestConfigRead);
 &_runTest(\&TestFirstBackup);
+&_runTest(\&TestPathSpacesQuotes);
 &_runTest(\&TestMultiBackup);
 &_runTest(\&TestSecondBackupNoChange);
 &_runTest(\&TestDiffCreation);

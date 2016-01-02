@@ -80,15 +80,15 @@ sub rsync {
 		. " --delete";
 
 	if ($LINK_DEST) {
-		$command .= " --link-dest $LINK_DEST";
+		$command .= " --link-dest \"$LINK_DEST\"";
 	}
 
 	foreach (@BACKUPS) {
-		$command .= " $_";
+		$command .= " \"$_\"";
 	}
-	$command .= " $DESTINATION/$DATE_TODAY";
+	$command .= " \"$DESTINATION/$DATE_TODAY\"";
 
-	system("mkdir -p '$DESTINATION'");
+	system("mkdir -p \"$DESTINATION\"");
 
 	print "$command\n";
 	system("$command");
@@ -98,7 +98,7 @@ sub rsync {
 
 sub trimDays {
 	while ($#DAYS ge $MAX_DAYS) {
-		system("rm -rf '$DESTINATION/$DAYS[$#DAYS]'");
+		system("rm -rf \"$DESTINATION/$DAYS[$#DAYS]\"");
 		pop(@DAYS);
 	}
 }

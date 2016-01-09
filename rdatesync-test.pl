@@ -2,7 +2,7 @@
 
 use warnings;
 use strict;
-use Test::More tests => 20;
+use Test::More tests => 15;
 
 my $DEBUG = 0;
 my $WORKSPACE = "/tmp/rds_ws";
@@ -306,19 +306,24 @@ sub TestSecondBackupNoChange {
 	isnt( &_inode($file_original), &_inode($file_today), "inode does not match source" );
 }
 
-=head2 TestDiffCreation
+=head2 TestResults
 
-rdatesync.pl should create a file "changes" in the new directory if there were changes
+Specify a directory with the following line in rdatesync conf to produce an itemized list
+of changes:
+
+	results /path/to/dir
+
+rdatesync.pl will generate itemized lists of changes in that directory
 
 =cut
 
-sub TestDiffCreation {
+sub TestResults {
 	my $date_today = `printf \$(date +%Y-%m-%d)`;
 	my $date_yesterday = `printf \$(date --date="yesterday" +%Y-%m-%d)`;
 	my $file_original =  "$WORKSPACE/folder/file";
 	my $file_today =     "$WORKSPACE/target/$date_today/folder/file";
 	my $file_yesterday = "$WORKSPACE/target/$date_yesterday/folder/file";
-	my $changes;
+	my $results_file =   "$WORKSPACE/results/$date_today.log";
 	my $conf;
 
 	&_mkfile("$WORKSPACE/source/afile");
@@ -327,44 +332,11 @@ sub TestDiffCreation {
 		"$WORKSPACE/target",
 		"$WORKSPACE/source"
 	);
+	system("echo 'results $WORKSPACE/results' >> $conf");
 
 	&_runconf($conf);
 
-	ok( ! -f "$WORKSPACE/target/$date_today/changes", "No diff file created for first backup" );
-
-	system("mv $WORKSPACE/target/$date_today $WORKSPACE/target/$date_yesterday");
-	&_runconf($conf);
-
-	$changes = `cat $WORKSPACE/target/$date_today/changes`;
-	ok( $changes eq "$date_yesterday => $date_today\n", "No changes detected" );
-
-	system("rm -r $WORKSPACE/target/$date_today");
-	&_mkfile("$WORKSPACE/source/secondfile");
-	&_runconf($conf);
-
-	$changes = `cat $WORKSPACE/target/$date_today/changes`;
-	ok( $changes =~ /\+ source\/secondfile/, "New file detected" );
-
-	system("rm -r $WORKSPACE/target/$date_today");
-	system("echo 'a modification' >> $WORKSPACE/source/afile");
-	&_runconf($conf);
-
-	$changes = `cat $WORKSPACE/target/$date_today/changes`;
-	ok( $changes =~ /~ source\/afile/, "Modified file detected" );
-
-	system("rm -r $WORKSPACE/target/$date_today");
-	unlink("$WORKSPACE/source/afile");
-	&_runconf($conf);
-
-	$changes = `cat $WORKSPACE/target/$date_today/changes`;
-	ok( $changes =~ /- source\/afile/, "Removed file detected" );
-
-	system("rm -r $WORKSPACE/target/$date_yesterday");
-	system("mv $WORKSPACE/target/$date_today $WORKSPACE/target/$date_yesterday");
-	&_runconf($conf);
-
-	$changes = `cat $WORKSPACE/target/$date_today/changes`;
-	ok( $changes !~ /changes/, "Changes file should not show itself" );
+	ok( -f $results_file, "Results file created" );
 }
 
 =head2 TestLinkMostRecent
@@ -528,5 +500,5 @@ sub _writeconf {
 &_runTest(\&TestPathSpacesQuotes);
 &_runTest(\&TestMultiBackup);
 &_runTest(\&TestSecondBackupNoChange);
-&_runTest(\&TestDiffCreation);
+&_runTest(\&TestResults);
 &_teardown();

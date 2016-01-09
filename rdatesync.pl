@@ -6,12 +6,12 @@ use strict;
 my $DESTINATION;
 my @BACKUPS = ();
 my @MOUNTS = ();
-my $DIFF_TOOL = `printf "\$(cd \$(dirname $0); pwd)/simplediff.sh"`;
 my @DAYS = ();
 my $DATE_TODAY = `date +%Y-%m-%d`;
 chomp($DATE_TODAY);
-my $LINK_DEST;
+my $LINK_DEST = "";
 my $MAX_DAYS = 7;
+my $RESULTS_DIR = "";
 
 if ($#ARGV < 0) {
 	&usage();
@@ -21,9 +21,6 @@ if ($#ARGV < 0) {
 &getDays();
 &rsync();
 #&trimDays();
-if (-d $LINK_DEST and -x $DIFF_TOOL) {
-	system("$DIFF_TOOL \"$LINK_DEST\" \"$DESTINATION/$DATE_TODAY\"");
-}
 
 sub usage {
 	print "Usage:\n"
@@ -50,6 +47,12 @@ sub readConf {
 			elsif ($_ =~ /^backup\s+(.*)$/) {
 				print "backup: $1\n";
 				push(@BACKUPS, $1);
+			}
+			elsif ($_ =~ /^results\s+(.*)$/) {
+				if (! -e $RESULTS_DIR or -d $RESULTS_DIR) {
+					print "results $1\n";
+					$RESULTS_DIR = $1;
+				}
 			}
 		}
 		close(CFH);
@@ -81,6 +84,12 @@ sub rsync {
 
 	if ($LINK_DEST) {
 		$command .= " --link-dest \"$LINK_DEST\"";
+	}
+
+	if ($RESULTS_DIR) {
+		system('mkdir -p "' . $RESULTS_DIR . '"');
+		$command .= " --itemize-changes";
+		$command .= ' --log-file "' . $RESULTS_DIR . '/' . $DATE_TODAY . '.log"';
 	}
 
 	foreach (@BACKUPS) {

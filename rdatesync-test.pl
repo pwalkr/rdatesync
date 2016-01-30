@@ -24,6 +24,11 @@ sub _runTest {
 	&{$test}();
 }
 
+=head1 Usage
+
+Rdatesync runs with a configuration file as an argument. For details on the
+what the contents of this file should be, run without arguments.
+
 =head2 TestUsageOutput
 
 If run without arguments, rdatesync.pl should print usage.
@@ -34,6 +39,16 @@ sub TestUsageOutput {
 	my $output = `perl $RDATESYNC`;
 	ok( $output =~ "Usage", "Output shows Usage" );
 }
+
+=head1 Configuration
+
+Configure rdatesync.pl by giving it a config file as an argument. This file
+must be of the format:
+
+	destination /path/to/backups/destination
+	backup /path/to/backup
+	backup /path/to/another/backup
+	backup ...
 
 =head2 TestConfigRead
 
@@ -149,6 +164,8 @@ sub TestConfigNoDestination {
 
 sub TestConfigNoBackups {
 }
+
+=head1 Backups
 
 =head2 TestFirstBackup
 

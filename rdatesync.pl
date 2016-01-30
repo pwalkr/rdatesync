@@ -7,8 +7,8 @@ my $DESTINATION;
 my @BACKUPS = ();
 my @MOUNTS = ();
 my @DAYS = ();
-my $DATE_TODAY = `date +%Y-%m-%d`;
-chomp($DATE_TODAY);
+chomp(my $DATE_MONTH = `date +%Y-%m`);
+chomp(my $DATE_TODAY = `date +%Y-%m-%d`);
 my $LINK_DEST = "";
 my $MAX_DAYS = 7;
 my $RESULTS_DIR = "";
@@ -42,7 +42,7 @@ sub readConf {
 		while (<CFH>) {
 			if ($_ =~ /^destination\s+(.*)$/) {
 				print "destination: $1\n";
-				$DESTINATION = $1;
+				$DESTINATION = "$1/$DATE_MONTH";
 			}
 			elsif ($_ =~ /^backup\s+(.*)$/) {
 				print "backup: $1\n";

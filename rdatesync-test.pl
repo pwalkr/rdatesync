@@ -186,12 +186,13 @@ Will produce (if run on January 2nd, 2000):
 sub TestFirstBackup {
 	my $destination = "$WORKSPACE/archive";
 	my $backup = "$WORKSPACE/source";
+	my $date_month = &_chompc("date +%Y-%m");
 	my $date_today = &_chompc("date +%Y-%m-%d");
 	my $source_file_path;
 	my $target_file_path;
 
 	$source_file_path = "$backup/testFile";
-	$target_file_path = "$destination/$date_today/source/testFile";
+	$target_file_path = "$destination/$date_month/$date_today/source/testFile";
 
 	&_mkfile($source_file_path);
 
@@ -227,12 +228,13 @@ The following are tested:
 sub TestPathSpacesQuotes {
 	my $destination = "$WORKSPACE/the archive's";
 	my $backup = "$WORKSPACE/my source's/source's source";
+	my $date_month = &_chompc("date +%Y-%m");
 	my $date_today = &_chompc("date +%Y-%m-%d");
 	my $source_file_path;
 	my $target_file_path;
 
 	$source_file_path = "$backup/testFile";
-	$target_file_path = "$destination/$date_today/source's source/testFile";
+	$target_file_path = "$destination/$date_month/$date_today/source's source/testFile";
 
 	&_mkfile($source_file_path);
 
@@ -255,6 +257,7 @@ sub TestMultiBackup {
 	my $destination = "$WORKSPACE/archive";
 	my $backup1 = "$WORKSPACE/source1";
 	my $backup2 = "$WORKSPACE/source2";
+	my $date_month = &_chompc("date +%Y-%m");
 	my $date_today = &_chompc("date +%Y-%m-%d");
 	my $source_file_path1 = "$backup1/testFile";
 	my $source_file_path2 = "$backup2/testFile";
@@ -266,8 +269,8 @@ sub TestMultiBackup {
 		$backup2
 	);
 
-	$target_file_path1 = "$destination/$date_today/source1/testFile";
-	$target_file_path2 = "$destination/$date_today/source2/testFile";
+	$target_file_path1 = "$destination/$date_month/$date_today/source1/testFile";
+	$target_file_path2 = "$destination/$date_month/$date_today/source2/testFile";
 
 	&_mkfile($source_file_path1);
 	&_mkfile($source_file_path2);
@@ -292,11 +295,12 @@ Test passes if inodes match between today/yesterday for all files.
 
 sub TestSecondBackupNoChange {
 	# Check for all hard links to previous backup
+	my $date_month = &_chompc("date +%Y-%m");
 	my $date_today = &_chompc("date +%Y-%m-%d");
 	my $date_yesterday = &_chompc('date --date="yesterday" +%Y-%m-%d');
 	my $file_original =  "$WORKSPACE/folder/file";
-	my $file_today =     "$WORKSPACE/target/$date_today/folder/file";
-	my $file_yesterday = "$WORKSPACE/target/$date_yesterday/folder/file";
+	my $file_today =     "$WORKSPACE/target/$date_month/$date_today/folder/file";
+	my $file_yesterday = "$WORKSPACE/target/$date_month/$date_yesterday/folder/file";
 	my $conf;
 
 	&_mkfile("$file_original");
@@ -308,7 +312,7 @@ sub TestSecondBackupNoChange {
 
 	&_runconf($conf);
 
-	system("mv $WORKSPACE/target/$date_today $WORKSPACE/target/$date_yesterday");
+	system("mv $WORKSPACE/target/$date_month/$date_today $WORKSPACE/target/$date_month/$date_yesterday");
 
 	&_runconf($conf);
 

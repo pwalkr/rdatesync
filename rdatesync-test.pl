@@ -2,7 +2,7 @@
 
 use warnings;
 use strict;
-use Test::More tests => 15;
+use Test::More tests => 17;
 
 my $DEBUG = 0;
 my $WORKSPACE = "/tmp/rds_ws";
@@ -333,10 +333,6 @@ rdatesync.pl will generate itemized lists of changes in that directory
 
 sub TestResults {
 	my $date_today = &_chompc("date +%Y-%m-%d");
-	my $date_yesterday = &_chompc('date --date="yesterday" +%Y-%m-%d');
-	my $file_original =  "$WORKSPACE/folder/file";
-	my $file_today =     "$WORKSPACE/target/$date_today/folder/file";
-	my $file_yesterday = "$WORKSPACE/target/$date_yesterday/folder/file";
 	my $results_file =   "$WORKSPACE/results/$date_today.log";
 	my $conf;
 
@@ -351,6 +347,8 @@ sub TestResults {
 	&_runconf($conf);
 
 	ok( -f $results_file, "Results file created" );
+	ok( `cat $results_file` =~ 'cd\+\+\+\+\+\+\+\+\+ source/',      "Results note directory creation" );
+	ok( `cat $results_file` =~ '>f\+\+\+\+\+\+\+\+\+ source/afile', "Results note file creation" );
 }
 
 =head2 TestLinkMostRecent

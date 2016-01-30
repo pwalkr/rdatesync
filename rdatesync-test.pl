@@ -6,7 +6,7 @@ use Test::More tests => 15;
 
 my $DEBUG = 0;
 my $WORKSPACE = "/tmp/rds_ws";
-my $RDATESYNC = `printf \$(cd \$(dirname $0) && pwd)/rdatesync.pl`;
+my $RDATESYNC = &_chompc("cd \$(dirname $0) && pwd") . "/rdatesync.pl";
 
 sub _setup {
 	system("rm -rf $WORKSPACE");
@@ -169,11 +169,10 @@ Will produce (if run on January 2nd, 2000):
 sub TestFirstBackup {
 	my $destination = "$WORKSPACE/archive";
 	my $backup = "$WORKSPACE/source";
-	my $date_today = `date +%Y-%m-%d`;
+	my $date_today = &_chompc("date +%Y-%m-%d");
 	my $source_file_path;
 	my $target_file_path;
 
-	chomp($date_today);
 	$source_file_path = "$backup/testFile";
 	$target_file_path = "$destination/$date_today/source/testFile";
 
@@ -211,11 +210,10 @@ The following are tested:
 sub TestPathSpacesQuotes {
 	my $destination = "$WORKSPACE/the archive's";
 	my $backup = "$WORKSPACE/my source's/source's source";
-	my $date_today = `date +%Y-%m-%d`;
+	my $date_today = &_chompc("date +%Y-%m-%d");
 	my $source_file_path;
 	my $target_file_path;
 
-	chomp($date_today);
 	$source_file_path = "$backup/testFile";
 	$target_file_path = "$destination/$date_today/source's source/testFile";
 
@@ -240,7 +238,7 @@ sub TestMultiBackup {
 	my $destination = "$WORKSPACE/archive";
 	my $backup1 = "$WORKSPACE/source1";
 	my $backup2 = "$WORKSPACE/source2";
-	my $date_today = `date +%Y-%m-%d`;
+	my $date_today = &_chompc("date +%Y-%m-%d");
 	my $source_file_path1 = "$backup1/testFile";
 	my $source_file_path2 = "$backup2/testFile";
 	my $target_file_path1;
@@ -251,7 +249,6 @@ sub TestMultiBackup {
 		$backup2
 	);
 
-	chomp($date_today);
 	$target_file_path1 = "$destination/$date_today/source1/testFile";
 	$target_file_path2 = "$destination/$date_today/source2/testFile";
 
@@ -278,8 +275,8 @@ Test passes if inodes match between today/yesterday for all files.
 
 sub TestSecondBackupNoChange {
 	# Check for all hard links to previous backup
-	my $date_today = `printf \$(date +%Y-%m-%d)`;
-	my $date_yesterday = `printf \$(date --date="yesterday" +%Y-%m-%d)`;
+	my $date_today = &_chompc("date +%Y-%m-%d");
+	my $date_yesterday = &_chompc('date --date="yesterday" +%Y-%m-%d');
 	my $file_original =  "$WORKSPACE/folder/file";
 	my $file_today =     "$WORKSPACE/target/$date_today/folder/file";
 	my $file_yesterday = "$WORKSPACE/target/$date_yesterday/folder/file";
@@ -318,8 +315,8 @@ rdatesync.pl will generate itemized lists of changes in that directory
 =cut
 
 sub TestResults {
-	my $date_today = `printf \$(date +%Y-%m-%d)`;
-	my $date_yesterday = `printf \$(date --date="yesterday" +%Y-%m-%d)`;
+	my $date_today = &_chompc("date +%Y-%m-%d");
+	my $date_yesterday = &_chompc('date --date="yesterday" +%Y-%m-%d');
 	my $file_original =  "$WORKSPACE/folder/file";
 	my $file_today =     "$WORKSPACE/target/$date_today/folder/file";
 	my $file_yesterday = "$WORKSPACE/target/$date_yesterday/folder/file";
@@ -398,6 +395,17 @@ sub TestLogRemoveFile {
 }
 
 =head1 Utility Functions
+
+=head2 _chompc
+
+Run command and chomp newline off of output. Return STDOUT
+
+=cut
+
+sub _chompc {
+	chomp(my $output = `$_[0]`);
+	return $output;
+}
 
 =head2 _dirname
 

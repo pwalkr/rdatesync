@@ -2,7 +2,7 @@
 
 use warnings;
 use strict;
-use Test::More tests => 17;
+use Test::More tests => 20;
 
 my $DEBUG = 0;
 my $WORKSPACE = "/tmp/rds_ws";
@@ -351,8 +351,11 @@ sub TestResults {
 	&_runconf($conf);
 
 	ok( -f $results_file, "Results file created" );
-	ok( `cat $results_file` =~ 'cd\+\+\+\+\+\+\+\+\+ source/',      "Results note directory creation" );
-	ok( `cat $results_file` =~ '>f\+\+\+\+\+\+\+\+\+ source/afile', "Results note file creation" );
+	ok( `head -1 $results_file` =~ /\$ [a-z\/]*rsync .+source/,     "Results show command run" );
+	ok( `cat $results_file` =~ 'cd\+\+\+\+\+\+\+\+\+ source/',      "Results show directory creation" );
+	ok( `cat $results_file` =~ '>f\+\+\+\+\+\+\+\+\+ source/afile', "Results show file creation" );
+	ok( `tail $results_file` =~ /\$ [a-z\/]*df /,                   "Results show df call" );
+	ok( `tail $results_file` =~ /Filesystem\s+Size\s+Used/,         "Results show df headers" );
 }
 
 =head2 TestLinkMostRecent

@@ -12,6 +12,7 @@ chomp(my $DATE_TODAY = `date +%Y-%m-%d`);
 my $LINK_DEST = "";
 my $MAX_DAYS = 7;
 my $RESULTS_DIR = "";
+my $RESULTS_FILE = "";
 
 if ($#ARGV < 0) {
 	&usage();
@@ -52,6 +53,7 @@ sub readConf {
 				if (! -e $RESULTS_DIR or -d $RESULTS_DIR) {
 					print "results $1\n";
 					$RESULTS_DIR = $1;
+					$RESULTS_FILE = "$RESULTS_DIR/$DATE_TODAY.log";
 				}
 			}
 		}
@@ -89,7 +91,7 @@ sub rsync {
 	if ($RESULTS_DIR) {
 		system('mkdir -p "' . $RESULTS_DIR . '"');
 		$command .= " --itemize-changes";
-		$command .= ' --log-file "' . $RESULTS_DIR . '/' . $DATE_TODAY . '.log"';
+		$command .= ' --log-file "' . $RESULTS_FILE . '"';
 	}
 
 	foreach (@BACKUPS) {
@@ -100,7 +102,15 @@ sub rsync {
 	system("mkdir -p \"$DESTINATION\"");
 
 	print "$command\n";
+	if ($RESULTS_DIR) {
+		system("echo '\$ $command' > \"$RESULTS_FILE\"");
+	}
 	system("$command");
+
+	if ($RESULTS_DIR) {
+		system("echo '\$ df -h' >> \"$RESULTS_FILE\"");
+		system("df -h >> \"$RESULTS_FILE\"");
+	}
 
 	unshift(@DAYS, $DATE_TODAY);
 }
